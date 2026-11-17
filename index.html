@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CEIDG-1 — symulator edukacyjny (15 punktów)</title>
+<style>
+:root{--ink:#161616;--muted:#555;--line:#8a8a8a;--bg:#eceff1;--ok:#196b35;--bad:#9f2424}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.38}
+.top{position:sticky;top:0;z-index:10;background:#151515;color:white;box-shadow:0 3px 15px #0002}
+.topinner{max-width:1280px;margin:auto;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.top small{color:#ddd}.top b{font-size:14px;letter-spacing:.035em}
+.controls{display:flex;gap:7px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid #555;border-radius:4px;padding:9px 14px;background:white;color:#111;font-weight:700}
+button:hover{filter:brightness(.94)}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #4974a6;outline-offset:2px}
+button.primary{background:#111;color:white;border-color:#555;box-shadow:0 0 0 1px #bbb inset}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.shell{max-width:1280px;margin:18px auto;padding:0 18px;display:grid;grid-template-columns:minmax(250px,345px) minmax(0,1fr);gap:18px;align-items:start}
+.sidebar{position:sticky;top:85px;background:white;border:1px solid #bdbdbd;padding:20px;max-height:calc(100vh - 102px);overflow:auto}
+.sidebar h2{font-size:17px;margin:0 0 7px}.sidebar p{margin:8px 0}.sidebar hr{border:0;border-top:1px solid #aaa;margin:15px 0}
+.fake{font-size:12px;display:inline-block;border:2px solid #111;padding:4px 9px;font-weight:800;letter-spacing:.06em;margin:8px 0 12px}
+.brief{background:#f4f4f4;border-left:3px solid #222;padding:10px 12px;font-size:13px}
+.brief p{margin:7px 0}.brief strong{font-weight:700}.brief small{color:#555}
+.paper{background:white;min-width:0;border:1px solid #c3c3c3;box-shadow:0 5px 22px #0002;padding:35px 43px 30px}
+.paperhead{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:12px}
+.paperhead h1{font-size:25px;line-height:1.23;margin:2px 0 5px;max-width:550px;letter-spacing:-.45px}
+.paperhead small{display:block;color:#666;font-size:11px}
+.stamp{font-size:11px;text-align:center;border:2px solid #111;padding:7px;max-width:160px;font-weight:bold;line-height:1.25}
+.notice{display:flex;gap:12px;font-size:12px;padding:10px 0 16px;border-bottom:2px solid #111}
+.notice strong{background:#111;color:#fff;font-size:11px;align-self:start;padding:3px 8px}
+.titleline{font-weight:bold;font-size:18px;margin:10px 0 16px}
+.form-section{border-bottom:2px solid #171717;padding:16px 0 21px;break-inside:avoid-page}
+.form-section h2{font-size:17px;margin:0 0 7px;font-weight:750}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px 26px}
+.field{position:relative;min-width:0;padding:2px 0 3px;break-inside:avoid}
+.field.wide{grid-column:1/-1}.field label{font-size:12.5px;color:#222;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.field label .points{font-size:10px;color:#666;font-weight:normal;margin-left:auto}
+.field input,.field select{display:block;width:100%;background:white;min-height:34px;border:0;border-bottom:1px solid #4c4c4c;border-radius:0;padding:5px 2px;font:inherit;color:#121212}
+.field select{border:1px solid #9b9b9b;margin-top:4px;padding:5px;background:#fff;border-radius:2px}
+.field input::placeholder{color:#a5a5a5}.field[data-status='bad'] input,.field[data-status='bad'] select{background:#fff6f6;border-bottom:2px solid var(--bad)}
+.field[data-status='ok'] input,.field[data-status='ok'] select{background:#f3fbf4;border-bottom:2px solid var(--ok)}
+.feedback{font-size:11px;margin-top:2px;display:none;font-weight:bold}.field[data-status='bad'] .feedback{display:block;color:var(--bad)}.field[data-status='ok'] .feedback{display:block;color:var(--ok)}
+.sectionmark{display:inline-block;border:1.5px solid #111;width:14px;height:14px;vertical-align:-2px;margin-right:8px}
+.bottom{padding:15px 0 3px;display:flex;justify-content:space-between;color:#555;font-size:11px}
+.status{border:1px solid #bbb;padding:12px;background:#fff;margin-top:16px}
+.status strong{font-size:26px}.status .small{font-size:12px;color:#555}.bar{height:6px;background:#ddd;margin:8px 0 9px}.bar span{height:100%;background:#111;display:block;width:0;transition:width .2s}
+#scorebox{display:none;margin-top:16px;background:#f8f8f8;border:2px solid #1c1c1c;padding:16px}
+#scorebox h2{margin:0;font-size:17px}.score{font-size:34px;font-weight:bold;margin:6px 0}
+#scorebox .helper{color:#555;font-size:12px}
+#reportSheet{display:none}
+.footer-note{font-size:11px;color:#555;margin-top:16px}
+@media (max-width:900px){.shell{grid-template-columns:1fr}.sidebar{position:relative;top:0;max-height:none}.paper{padding:28px 24px}}
+@media (max-width:570px){.fields{grid-template-columns:1fr}.paper{padding:22px 16px}.paperhead h1{font-size:20px}.stamp{max-width:120px}.topinner{padding:10px}.controls button{font-size:12px}}
+@page{size:A4;margin:12mm}
+@media print{
+ body{background:white;font-size:11px} .top,.controls,.noprint,.status,#scorebox,.feedback,.footer-note{display:none!important}
+ .shell{display:block;padding:0;margin:0;max-width:none}.sidebar{display:none}.paper{padding:0;border:0;box-shadow:none}
+ .field{padding:0}.fields{gap:7px 16px}.field label{font-size:10px}.field input,.field select{min-height:24px;font-size:11px;padding:2px}.form-section{padding:10px 0;break-inside:avoid-page}
+ .form-section h2{font-size:12px}.paperhead h1{font-size:19px}.notice{font-size:10px;padding:7px 0}
+ body[data-print='report'] .shell{display:none!important}
+ body[data-print='report'] #reportSheet{display:block!important}
+ #reportSheet h1{font-size:23px;margin:0 0 7px}#reportSheet h2{font-size:15px;margin:20px 0 10px}
+ #reportSheet .report-grade{font-size:30px;font-weight:bold;margin:10px 0}
+ #reportSheet table{border-collapse:collapse;width:100%;font-size:10px}
+ #reportSheet th,#reportSheet td{border:1px solid #777;text-align:left;padding:4px 6px}
+ #reportSheet th{background:#eee}
+}
+
+/* Identification separate from the school government-form facsimile. */
+.student-card{background:#f7f7f7;border:2px solid #242424;padding:14px;margin:13px 0 16px}
+.student-card h2{font-size:16px;margin:0 0 4px}
+.student-help{font-size:12px;color:#414141;margin:0 0 10px}
+.student-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.student-item label{display:block;font-weight:bold;font-size:12px;margin-bottom:3px}
+.student-item input{width:100%;min-width:0;min-height:42px;border:1px solid #878787;border-radius:3px;padding:8px 10px;font:inherit;background:white;color:#111}
+.student-item input[readonly]{background:#ededed}
+.student-error{color:#9f2424;font-size:12px;font-weight:700;margin:9px 0 0}
+.mobile-tools,.mobile-case-open{display:none}
+.case-dialog{width:min(95vw,660px);max-height:85vh;max-height:85dvh;border:1px solid #333;border-radius:9px;padding:0;box-shadow:0 18px 70px #0007;color:#151515;background:#fff}
+.case-dialog::backdrop{background:rgba(0,0,0,.62)}
+.dialog-head{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 16px;border-bottom:2px solid #161616;background:#fff}
+.dialog-head h2{font-size:17px;margin:0}.dialog-head button{min-height:42px}
+.dialog-content{padding:12px 16px 20px;font-size:14px;line-height:1.5}
+.dialog-content .brief{font-size:14px}
+.dialog-content .case-description{display:block!important}
+@media(max-width:820px){
+ body{padding-bottom:83px}
+ .top{position:relative}
+ .topinner{padding:11px 15px}
+ .topinner .controls{display:none}
+ .top b{font-size:12px}.top small{font-size:11px}
+ .shell{grid-template-columns:1fr;gap:13px;padding:0 10px;margin:11px auto}
+ .sidebar{position:static;max-height:none;overflow:visible;padding:12px}
+ .sidebar .fake{margin:0 0 8px}
+ .case-description{display:none}
+ .student-card{margin:10px 0 12px}
+ .mobile-case-open{display:block;width:100%;min-height:45px;background:#f8f8f8;border:1px solid #4a4a4a;margin-top:8px}
+ .paper{padding:19px 14px}
+ .fields{grid-template-columns:1fr;gap:13px}
+ .field label{font-size:14px;line-height:1.4}
+ .field input,.field select{font-size:16px;min-height:47px;padding:9px 6px}
+ .field label .points{font-size:12px}
+ .form-section{padding:16px 0}
+ .form-section h2{font-size:16px}
+ .mobile-tools{display:flex;position:fixed;left:0;right:0;bottom:0;bottom:env(safe-area-inset-bottom,0px);z-index:30;gap:8px;padding:9px 11px;background:#fff;border-top:2px solid #111;box-shadow:0 -3px 14px #0003}
+ .mobile-tools button{flex:1;min-width:0;min-height:49px;padding:9px 7px;font-size:13px;line-height:1.2}
+ .mobile-tools button[hidden]{display:none}
+ .mobile-tools .primary{background:#111;color:#fff;border-color:#111}
+ .paperhead{flex-wrap:wrap;gap:8px}
+ .paperhead h1{font-size:20px}
+ .paperhead .stamp{max-width:100%;font-size:10px;text-align:left}
+ .notice{font-size:12px}
+ .status strong{font-size:23px}
+ #scorebox{scroll-margin-top:14px}
+}
+@media(max-width:420px){.topinner{padding:10px}.paper{padding:16px 11px}.paperhead h1{font-size:18px}.mobile-tools button{font-size:12px}.student-item input{font-size:16px}}
+@media print{.mobile-tools,.mobile-case-open,.student-card,.case-dialog{display:none!important}body{padding:0!important}}
+
+.pkd-guidance a,.pkd-field-help a{color:#1a4374;text-decoration:underline;text-underline-offset:2px;font-weight:bold}
+.pkd-guidance a:focus-visible,.pkd-field-help a:focus-visible{outline:3px solid #4974a6;outline-offset:3px}
+.pkd-guidance small{display:block;margin-top:4px}
+.pkd-field-help{margin-top:9px;font-size:12px;line-height:1.45;color:#555}
+@media print{.pkd-field-help{display:none!important}}
+
+/* Pola rozbudowanego formularza i wersja na telefon. */
+.field[data-status='bad'] .radio-options{background:#fff6f6;border-color:var(--bad)}
+.field[data-status='ok'] .radio-options{background:#f3fbf4;border-color:var(--ok)}
+.field .radio-options{display:flex;gap:10px;flex-wrap:wrap;padding:10px 8px;border:1px solid #aaa;margin-top:7px;border-radius:3px}
+.field .radio-option{font-size:13px;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #aaa;border-radius:3px;cursor:pointer}
+.field .radio-option input{width:17px;height:17px;min-height:17px;margin:0;accent-color:#171717}
+.field .radio-option span{font-weight:600}
+.field .field-help{font-size:11px;color:#555;margin-top:6px;line-height:1.45}
+.field .points.none{color:#686868}
+.field[hidden]{display:none!important}
+.statement-text{font-size:12px;background:#f2f2f2;border-left:4px solid #222;padding:12px 14px;line-height:1.52;white-space:normal;margin:10px 0 15px}
+#casePrint{display:none}
+.print-case-card{border:1px solid #111;padding:14px;margin-bottom:20px}
+.print-case-card h2{margin:0 0 8px;font-size:16px}
+.summary-stripe{background:#f6f6f6;padding:9px 12px;border:1px solid #ddd;font-size:12px;margin-bottom:12px}
+@media(max-width:820px){.field .radio-option{min-height:44px;font-size:14px}.statement-text{font-size:13px}}
+@media print{
+ body[data-print='worksheet'] #casePrint{display:block!important;break-after:page}
+ .print-case-card{font-size:10px}.print-case-card .brief{font-size:10px}
+ .field .radio-options{padding:3px;gap:3px;border:1px solid #aaa}
+ .field .radio-option{font-size:10px;padding:3px 5px;min-height:auto}
+ .field .radio-option input{width:11px;height:11px;min-height:11px}
+ .statement-text{font-size:10px;margin:6px 0;padding:6px}
+ .field[hidden]{display:none!important}
+}
+
+
+.field .radio-option input[type="radio"]{appearance:none;-webkit-appearance:none;width:18px;height:18px;min-height:18px;border:1.5px solid #202020;border-radius:1px;display:grid;place-items:center;background:white;flex-shrink:0}
+.field .radio-option input[type="radio"]:checked::before{content:"✓";font-weight:900;line-height:1;font-size:15px;color:#111}
+.field .radio-option input[type="radio"]:focus-visible{outline:3px solid #4974a6;outline-offset:2px}
+.print-student{font-size:11px;border:1px solid #333;padding:10px;margin:0 0 13px;display:flex;gap:22px;flex-wrap:wrap}
+
+
+/* Identyfikatory NIP i REGON zawsze obok statusu na szerokim ekranie. */
+.identifier-line{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:15px;grid-column:1/-1;align-items:start}
+.identifier-line .field{width:100%}
+.identifier-line select{font-size:13px}
+/* Kalendarz przypięty bezpośrednio do edytowanego pola daty. */
+.date-line{position:relative;display:flex;align-items:stretch;gap:6px;margin-top:3px}
+.field .date-line>input.date-display{min-width:0;flex:1;width:auto}
+.field .date-line>button.calendar-button{flex:0 0 42px;min-width:42px;padding:4px 6px;border:1px solid #777;border-radius:3px;background:#fafafa;font-size:20px;min-height:40px}
+.date-calendar{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:min(310px,100%);min-width:235px;max-width:100%;background:#fff;border:1px solid #555;border-radius:5px;box-shadow:0 12px 34px #0004;padding:9px;color:#171717}
+.date-calendar[hidden]{display:none!important}
+.date-cal-head{display:grid;grid-template-columns:32px minmax(0,1.4fr) minmax(0,1fr) 32px;gap:5px;align-items:center;margin-bottom:9px}
+.date-cal-head button{min-width:32px;min-height:35px;padding:4px;border:1px solid #aaa;background:#f7f7f7;font-size:18px}
+.field .date-cal-head select{min-width:0;width:100%;min-height:35px;margin:0;padding:3px;border:1px solid #999;font-size:13px}
+.date-cal-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center}
+.date-cal-days .day-caption{font-size:11px;font-weight:700;color:#555;padding:5px 0}
+.date-cal-days .day-spacer{min-height:32px}
+.date-cal-days button{padding:0;min-width:0;min-height:34px;border:1px solid #ddd;background:white;border-radius:3px;font-size:13px;font-weight:400}
+.date-cal-days button:hover,.date-cal-days button:focus-visible{background:#dfeaf5}
+.date-cal-days button.selected{background:#202020;color:white;font-weight:bold}
+.recipient-row{max-width:calc(50% - 13px);margin:0 0 16px}
+@media(max-width:820px){.date-line>button.calendar-button{min-width:46px;flex-basis:46px}.recipient-row{max-width:100%}}
+@media print{.field .calendar-button,.date-calendar{display:none!important}.date-line{margin-top:0}.identifier-line{gap:8px}}
+
+/* Trzy pary danych osobowych: wspólne wiersze również na ekranach mobilnych. */
+.personal-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 26px;grid-column:1/-1;align-items:start;min-width:0}
+.personal-pair .field{min-width:0}
+.personal-pair .field label{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:37px}
+.personal-pair .field label .points{margin-left:0;white-space:nowrap}
+@media(max-width:820px){.personal-pair{gap:10px}}
+@media(max-width:420px){.personal-pair{gap:9px}.personal-pair .field label{font-size:12px}}
+@media print{.personal-pair{gap:7px 16px;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="top noprint"><div class="topinner"><div><b>CEIDG-1 • SYMULATOR EDUKACYJNY</b><br><small>Ćwiczenie szkolne · wersja inspirowana formularzem CEIDG-1 v3.3</small></div><div class="controls"><button type="button" id="check" class="primary">Sprawdź wniosek</button><button type="button" id="report" disabled>Wydrukuj wynik / PDF</button><button type="button" id="worksheet">Drukuj formularz</button><button type="button" id="reset">Wyczyść</button></div></div></header>
+<section id="casePrint" class="print-case-card"></section><main class="shell"><aside class="sidebar" id="case"><section class="student-card" id="studentInfo" aria-labelledby="studentTitle">
+<h2 id="studentTitle">Dane ucznia — poza wnioskiem</h2>
+<p class="student-help">Wypełnij przed rozpoczęciem. Dane są wymagane do podpisania pracy, ale <strong>nie są punktowane</strong>.</p>
+<div class="student-grid">
+<div class="student-item"><label for="studentName">Imię ucznia</label><input type="text" id="studentName" autocomplete="given-name" placeholder="Twoje imię" required></div>
+<div class="student-item"><label for="studentSurname">Nazwisko ucznia</label><input type="text" id="studentSurname" autocomplete="family-name" placeholder="Twoje nazwisko" required></div>
+<div class="student-item"><label for="studentClass">Klasa</label><input type="text" id="studentClass" autocomplete="off" placeholder="np. 3A" required></div>
+</div><p id="studentError" class="student-error" role="alert" hidden>Podaj imię, nazwisko i klasę, zanim sprawdzisz wniosek.</p>
+</section>
+<span class="fake">WYŁĄCZNIE DO CELÓW EDUKACYJNYCH</span><div class="case-description" id="caseDescription"><h2>Karta przypadku: rejestracja działalności</h2>
+<p>Wypełnij szkolną symulację CEIDG-1 na podstawie poniższych danych. Korzystaj ze wzorów z lekcji. Po naciśnięciu „Sprawdź wniosek” nie będzie można edytować odpowiedzi.</p>
+<div class="brief">
+<p><strong>Cel i osoba:</strong> pierwszy wpis nowej jednoosobowej działalności do CEIDG. Katarzyna Maria Malinowska (pierwsze imię Katarzyna, drugie Maria; nazwisko rodowe Malinowska), kobieta, obywatelstwo polskie. Imię ojca Andrzej, imię matki Joanna; data urodzenia <strong>1998.04.17</strong>, miejsce urodzenia Tychy.</p>
+<p><strong>Dane identyfikacyjne:</strong> PESEL <strong>98041712340</strong>, dowód osobisty <strong>AYA000000</strong>. Katarzyna nie posiada jeszcze NIP ani REGON.</p>
+<p><strong>Adres zamieszkania:</strong> ul. <strong>Jaśminowa 12/4</strong>, <strong>43-100 Tychy</strong>.</p>
+<p><strong>Dane firmy:</strong> „<strong>Katarzyna Malinowska KADR Studio Graficzne</strong>”, nazwa skrócona „KADR”; rozpoczęcie działalności <strong>2026.12.01</strong>; liczba pracujących 1 (łącznie z przedsiębiorczynią); e-mail <strong>kadr.studio@example.com</strong>.</p>
+<p><strong>Przeważająca działalność:</strong> projektowanie graficzne i komunikacja wizualna. Kod PKD 2025 odszukaj samodzielnie.</p>
+<p class="pkd-guidance"><a href="https://klasyfikacje.stat.gov.pl/Pkd2025" target="_blank" rel="noopener noreferrer">Otwórz wyszukiwarkę kodów PKD 2025</a>.</p>
+<p><strong>Adres do doręczeń:</strong> taki sam jak adres zamieszkania.</p>
+<p><strong>Stałe miejsce prowadzenia działalności:</strong> ul. <strong>Fabryczna 8/2</strong>, <strong>43-100 Tychy</strong>.</p>
+<p><strong>e-Doręczenia:</strong> Katarzyna wnioskuje o utworzenie adresu u publicznego dostawcy.</p>
+<p><strong>Ubezpieczenie:</strong> Zakład Ubezpieczeń Społecznych. Katarzyna nie korzysta z ulgi na start i od dnia rozpoczęcia działalności podlega ubezpieczeniom społecznym oraz zdrowotnemu.</p>
+<p><strong>Biuro rachunkowe:</strong> dokumentację rachunkową prowadzi <strong>Biuro Rachunkowe Liczydło sp. z o.o.</strong>, NIP <strong>7468250138</strong>.</p>
+<p><strong>Rachunek firmowy:</strong> kraj banku <strong>Polska</strong>; pełna nazwa banku <strong>Bank Akademicki S.A.</strong>; posiadacz rachunku <strong>Katarzyna Malinowska KADR Studio Graficzne</strong>; numer rachunku <strong>04000000000000000000000000</strong>.</p>
+<p><strong>Podatek:</strong> opodatkowanie na zasadach ogólnych (skala podatkowa).</p>
+<p><strong>Oświadczenie:</strong> wobec Katarzyny nie orzeczono wskazanych prawem zakazów prowadzenia działalności i posiada ona tytuł prawny do nieruchomości, których adresy poda we wniosku. Potwierdza pouczenie o odpowiedzialności karnej.</p>
+</div></div>
+<button class="mobile-case-open" type="button" id="caseInline" aria-haspopup="dialog">Otwórz kartę przedsiębiorcy</button>
+
+<div class="status"><div><strong id="filled">0</strong> / <span id="fieldTotal">68</span> widocznych pól wypełnionych</div><div class="bar"><span id="progress"></span></div><span class="small">Punktacja: <span id="pointsDetail">maksymalnie 15,00 pkt.</span></span></span></div>
+<div id="scorebox" role="status" aria-live="polite"><h2>Wynik końcowy — wniosek zamknięty</h2><div class="score" id="firstScore">—</div><div id="currentScore"></div><div class="helper" style="margin-top:8px">Po zatwierdzeniu wniosku nie można już zmieniać odpowiedzi ani ponownie go sprawdzać. Błędne pola są oznaczone, ale poprawne odpowiedzi nie są ujawniane.</div></div>
+<p class="footer-note">Plik działa lokalnie, bez internetu, bez konta i bez wysyłania danych do CEIDG. Do zapisania raportu jako PDF wybierz „Wydrukuj wynik / PDF”, a następnie w oknie drukowania wybierz „Zapisz jako PDF”.</p>
+</aside>
+<article class="paper" id="paper"><div class="paperhead"><div><small>Więcej informacji na oficjalnej stronie Biznes.gov.pl/ceidg</small><h1>CEIDG-1 (wersja 3.3) — Wniosek do Centralnej Ewidencji i Informacji o Działalności Gospodarczej</h1></div><div class="stamp">ĆWICZENIE SZKOLNE<br>NIE JEST WNIOSKIEM URZĘDOWYM</div></div>
+<div class="notice"><strong>UWAGA</strong><span id="fieldDescription">Symulator edukacyjny — wybrane sekcje CEIDG-1 (wersja 3.3), maksymalnie 15 punktów. Numeracja odpowiada formularzowi urzędowemu; pominiętych sekcji nie trzeba wypełniać.</span></div>
+<div id="sections"></div><div class="bottom"><span>CEIDG-1 · symulator szkolny · opracowanie dydaktyczne</span><span>15 punktów maksymalnie</span></div></article></main>
+<nav class="mobile-tools noprint" id="mobileTools" aria-label="Narzędzia mobilne"><button id="caseMobile" type="button" aria-haspopup="dialog">Opis przedsiębiorcy</button><button id="checkMobile" type="button" class="primary">Sprawdź wniosek</button><button id="reportMobile" type="button" class="primary" hidden>Wynik / PDF</button></nav>
+<dialog id="caseDialog" class="case-dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle">Karta przedsiębiorcy</h2><button id="caseClose" type="button" aria-label="Zamknij opis przedsiębiorcy">Zamknij ✕</button></div><div id="caseDialogContent" class="dialog-content"></div></dialog>
+<section id="reportSheet" aria-label="Raport oceniania"><h1>Raport oceny — symulator CEIDG-1</h1><p>Dokument dydaktyczny. Nie jest urzędowym wnioskiem ani potwierdzeniem jego złożenia.</p><p id="reportStudent"></p><p id="reportClass"></p><p id="reportDate"></p><div id="reportGrade" class="report-grade"></div><p id="reportAfter"></p><h2>Ocena poszczególnych pól — pierwsza próba</h2><table><thead><tr><th>Pole</th><th>Twoja odpowiedź przy pierwszym sprawdzeniu</th><th>Punkty</th></tr></thead><tbody id="reportRows"></tbody></table><p style="font-size:10px;margin-top:14px">Klucz odpowiedzi i punktacja są elementem uproszczonego ćwiczenia dydaktycznego. Złożenie prawdziwego wniosku jest możliwe wyłącznie oficjalną drogą.</p></section>
+<script>
+
+'use strict';
+const SECTIONS=[{"key":"kind","title":"1. Rodzaj wniosku","fields":[{"id":"typ","label":"Rodzaj wniosku","type":"select","answer":"Wniosek o wpis do CEIDG","points":0.41,"options":["","Wniosek o wpis do CEIDG","Wniosek o zmianę wpisu w CEIDG","Wniosek o zawieszenie wykonywania działalności gospodarczej","Wniosek o wznowienie wykonywania działalności gospodarczej","Wniosek o wykreślenie przedsiębiorcy z CEIDG"]}]},{"key":"person","title":"2. Dane wnioskodawcy / przedsiębiorcy","fields":[{"id":"plec","label":"Płeć","type":"select","answer":"Kobieta","points":0.2,"options":["","Kobieta","Mężczyzna"]},{"id":"nazwisko","label":"Nazwisko","type":"text","answer":"Malinowska","points":0.19},{"id":"imie","label":"Pierwsze imię","type":"text","answer":"Katarzyna","points":0.19},{"id":"drugie_imie","label":"Drugie imię","type":"text","answer":"Maria","points":0},{"id":"nazwisko_rodowe","label":"Nazwisko rodowe","type":"text","answer":"Malinowska","points":0},{"id":"ojciec","label":"Imię ojca","type":"text","answer":"Andrzej","points":0.2},{"id":"matka","label":"Imię matki","type":"text","answer":"Joanna","points":0.2},{"id":"miejsce_ur","label":"Miejsce urodzenia","type":"text","answer":"Tychy","points":0.2},{"id":"data_ur","label":"Data urodzenia (rrrr.mm.dd)","type":"date","answer":"1998.04.17","points":0.19},{"id":"pesel","label":"PESEL","type":"text","answer":"98041712340","points":0.19},{"id":"dokument","label":"Rodzaj dokumentu tożsamości","type":"select","answer":"Dowód osobisty","points":0.2,"options":["","Dowód osobisty","Paszport","Inny"]},{"id":"nr_dokumentu","label":"Seria i numer dokumentu","type":"text","answer":"AYA000000","points":0.2},{"id":"obywat","label":"Posiadane obywatelstwo","type":"select","answer":"Polskie","points":0.2,"options":["","Polskie","Inne","Nie posiadam obywatelstwa"]},{"id":"nip","label":"NIP — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"nip_numer","label":"Numer NIP","type":"text","answer":"","points":0.2,"dependsOn":"nip","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":10,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 10 cyfr numeru NIP."},{"id":"regon","label":"REGON — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"regon_numer","label":"Numer REGON","type":"text","answer":"","points":0.2,"dependsOn":"regon","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":14,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 9 lub 14 cyfr numeru REGON."}]},{"key":"statement","title":"3. Oświadczenie","fields":[{"id":"oswiadczenie","label":"Potwierdzam złożenie powyższego oświadczenia","type":"select","answer":"Tak","points":0.41,"options":["","Tak","Nie"]}]},{"key":"home","title":"4. Adres zamieszkania","fields":[{"id":"zam_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"zam_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"zam_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"zam_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"zam_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"zam_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"zam_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"zam_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"zam_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"zam_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"contact","title":"5. Dane do kontaktu","fields":[{"id":"email","label":"Adres e-mail","type":"email","answer":"kadr.studio@example.com","points":0.2}]},{"key":"firm","title":"6. Dane firmy","fields":[{"id":"firma","label":"Nazwa firmy przedsiębiorcy","type":"text","answer":"Katarzyna Malinowska KADR Studio Graficzne","points":0.2,"wide":true},{"id":"skrot","label":"Nazwa skrócona","type":"text","answer":"KADR","points":0.2},{"id":"start","label":"Data rozpoczęcia działalności (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"liczba","label":"Przewidywana liczba pracujących (w tym przedsiębiorczyni)","type":"text","answer":"1","points":0.2},{"id":"pkd","label":"Przeważający kod PKD 2025","type":"text","answer":"74.12.Z","points":0.41,"placeholder":"np. 12.34.Z","help":"Zachowaj kropki i literę; dopuszczane są także zapisy bez kropek. Wyszukaj kod w GUS."}]},{"key":"delivery","title":"7. Adres do doręczeń","fields":[{"id":"dor_adresat","label":"Adresat","type":"text","answer":"Katarzyna Malinowska","points":0.2},{"id":"dor_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"dor_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"dor_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"dor_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"dor_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"dor_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"dor_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"dor_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"dor_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"dor_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"place","title":"8. Stałe miejsce wykonywania działalności gospodarczej","fields":[{"id":"miejsce_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"miejsce_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"miejsce_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_ulica","label":"Ulica","type":"text","answer":"Fabryczna","points":0.2},{"id":"miejsce_budynek","label":"Numer nieruchomości","type":"text","answer":"8","points":0.2},{"id":"miejsce_lokal","label":"Numer lokalu","type":"text","answer":"2","points":0.2},{"id":"miejsce_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"miejsce_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"eDelivery","title":"10. Adres do e-Doręczeń","fields":[{"id":"edorecz","label":"Wybór dotyczący adresu do e-Doręczeń","type":"select","answer":"Wnioskuję o utworzenie u publicznego dostawcy","points":0.41,"options":["","Wnioskuję o utworzenie u publicznego dostawcy","Posiadam adres u niepublicznego dostawcy","Nie dotyczy"]}]},{"key":"insurance","title":"11. Podlegam obowiązkowemu ubezpieczeniu","fields":[{"id":"zus","label":"Instytucja ubezpieczeniowa","type":"select","answer":"Zakład Ubezpieczeń Społecznych","points":0.41,"options":["","Zakład Ubezpieczeń Społecznych","Kasa Rolniczego Ubezpieczenia Społecznego","Jestem ubezpieczony za granicą"]},{"id":"zus_data","label":"Data powstania obowiązku opłacania składek ZUS (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"zus_zgloszenie","label":"Dołączam zgłoszenia ZUS","type":"radio","answer":"ZUA","points":0.41,"options":["ZZA","ZWUA","ZUA","ZIUA","ZCNA"]}]},{"key":"tax","title":"16. Oświadczenie o formie opłacania podatku dochodowego","fields":[{"id":"podatek","label":"Forma opłacania podatku dochodowego","type":"select","answer":"Na zasadach ogólnych (skala podatkowa)","points":0.41,"options":["","Na zasadach ogólnych (skala podatkowa)","Podatek liniowy","Ryczałt od przychodów ewidencjonowanych"]}]},{"key":"bookkeeping","title":"18.1. Dane podmiotu prowadzącego dokumentację rachunkową","fields":[{"id":"ksiegowa_firma","label":"Firma","type":"text","answer":"Biuro Rachunkowe Liczydło sp. z o.o.","points":0.41,"wide":true},{"id":"ksiegowa_nip","label":"NIP","type":"text","answer":"7468250138","points":0.2,"inputmode":"numeric"}]},{"key":"bank","title":"22.1. Rachunek firmowy (związany z działalnością gospodarczą)","fields":[{"id":"bank_kraj","label":"Kraj siedziby banku (oddziału)","type":"text","answer":"Polska","points":0.19},{"id":"bank_swift","label":"Kod SWIFT (opcjonalnie, tylko dla zagranicznego rachunku)","type":"text","answer":"","points":0},{"id":"bank_nazwa","label":"Pełna nazwa banku (oddziału)","type":"text","answer":"Bank Akademicki S.A.","points":0.2},{"id":"bank_posiadacz","label":"Posiadacz rachunku","type":"text","answer":"Katarzyna Malinowska KADR Studio Graficzne","points":0.2,"wide":true},{"id":"bank_numer","label":"Numer rachunku (od 5 do 26 znaków)","type":"text","answer":"04000000000000000000000000","points":0.19,"minLength":5,"maxLength":26}]},{"key":"civil","title":"23. Forma prowadzenia działalności","fields":[{"id":"cywilna","label":"Forma prowadzenia działalności","type":"radio","answer":"Prowadzę działalność indywidualnie","points":0.41,"options":["Prowadzę działalność indywidualnie","Prowadzę działalność indywidualnie i w formie spółki cywilnej","Prowadzę działalność w formie spółki cywilnej"]}]}];
+const STMT="Oświadczam, że wobec osoby, której wpis dotyczy, nie orzeczono prawomocnie zakazów, o których mowa w art. 5 ust. 2 pkt 13-15 ustawy z dnia 6 marca 2018 r. o Centralnej Ewidencji i Informacji o Działalności Gospodarczej i Punkcie Informacji dla Przedsiębiorcy w zakresie działalności gospodarczej objętej wpisem, oraz, że osoba, której wpis dotyczy, posiada tytuł prawny do nieruchomości, których adresy są wpisywane do CEIDG. Jestem świadomy odpowiedzialności karnej za złożenie fałszywego oświadczenia.";
+const FIELDS=SECTIONS.flatMap(s=>s.fields);
+// Wszystkie wymagane pola są sprawdzane. Dwa pola osobowe pozostają niepunktowane,
+// a SWIFT jest opcjonalny, gdy rachunek prowadzi polski bank.
+const GRADED=FIELDS.filter(f=>f.points>0);
+const REQUIRED_GRADED=GRADED.filter(f=>!f.dependsOn);
+const RAW_TOTAL=REQUIRED_GRADED.reduce((sum,f)=>sum+f.points,0);
+const SCALE=15/RAW_TOTAL;
+// Punktacja edukacyjna wersji 3.3: 11 pól x 0,41 pkt, 11 pól x 0,19 pkt,
+// 42 pola x 0,20 pkt = dokładnie 15,00 pkt. Pola warunkowe oceniane osobno.
+// Rozdział dokładnie 1500 groszy punktowych, aby po zaokrągleniu suma pól = 15,00 pkt.
+const CENT_SPLIT=REQUIRED_GRADED.map((f,i)=>{
+ const exact=100*f.points*SCALE,cents=Math.floor(exact+1e-9);
+ return {id:f.id,index:i,cents,remainder:exact-cents};
+});
+const remainderCents=1500-CENT_SPLIT.reduce((n,x)=>n+x.cents,0);
+CENT_SPLIT.slice().sort((a,b)=>b.remainder-a.remainder||a.index-b.index).slice(0,remainderCents).forEach(x=>x.cents++);
+const POINT_MAP=new Map(CENT_SPLIT.map(x=>[x.id,x.cents/100]));
+const fieldScore=f=>POINT_MAP.get(f.id)??Math.round(f.points*SCALE*100)/100;
+if(!RAW_TOTAL || new Set(FIELDS.map(f=>f.id)).size!==FIELDS.length || CENT_SPLIT.reduce((n,x)=>n+x.cents,0)!==1500){throw new Error('Niewłaściwy klucz punktowania');}
+const REF_CODES=new Set(['ZZA','ZWUA','ZUA','ZIUA','ZCNA']);
+let firstResult=null;
+const inputMap=new Map();
+const fmt=n=>Number(n).toFixed(2).replace('.',',');
+const clean=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const DOTTED_DATE=/^\d{4}\.\d{2}\.\d{2}$/;
+function isValidDate(value){
+ if(!DOTTED_DATE.test(value))return false;
+ const [y,m,d]=value.split('.').map(Number);
+ const dt=new Date(Date.UTC(y,m-1,d));
+ return dt.getUTCFullYear()===y && dt.getUTCMonth()+1===m && dt.getUTCDate()===d;
+}
+function displayDate(){
+ const now=new Date();
+ return [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('.')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+}
+function getValue(f){
+ if(f.type==='radio'){const checked=document.querySelector('input[name="'+f.id+'"]:checked');return checked?checked.value:'';}
+ return inputMap.get(f.id)?.value??'';
+}
+function setValue(f,val){
+ if(f.type==='radio'){document.querySelectorAll('input[name="'+f.id+'"]').forEach(el=>el.checked=(el.value===val));}
+ else if(inputMap.has(f.id)) inputMap.get(f.id).value=val;
+}
+function isActive(f){return !f.dependsOn || getValue(FIELDS.find(x=>x.id===f.dependsOn))===f.visibleWhen;}
+function updateVisibility(){
+ for(const f of FIELDS){if(!f.dependsOn)continue;
+   const wrapper=document.getElementById('wrap_'+f.id),active=isActive(f);
+   wrapper.hidden=!active;
+   const node=inputMap.get(f.id); if(node){node.disabled=!active||!!firstResult;if(!active)node.value='';}
+ }
+ updateProgress();
+}
+function updateProgress(){
+ const active=FIELDS.filter(isActive),n=active.filter(f=>getValue(f).trim()).length;
+ document.getElementById('filled').textContent=n;
+ document.getElementById('fieldTotal').textContent=active.length;
+ document.getElementById('progress').style.width=(active.length?(n/active.length*100):0)+'%';
+}
+const PAIR_START=new Map([['nazwisko','imie'],['drugie_imie','nazwisko_rodowe'],['ojciec','matka']]);
+const PAIR_END=new Map([...PAIR_START].map(([first,second])=>[second,first]));
+function render(){
+ const container=document.getElementById('sections');
+ for(const sectionData of SECTIONS){
+  const section=document.createElement('section');section.className='form-section';
+  const heading=document.createElement('h2');heading.textContent=sectionData.title;section.append(heading);
+  if(sectionData.key==='statement'){
+   const oath=document.createElement('div');oath.className='statement-text';oath.textContent=STMT;section.append(oath);
+  }
+  const grid=document.createElement('div');grid.className='fields';
+  for(const f of sectionData.fields){
+   const wrap=document.createElement('div');wrap.className='field';wrap.id='wrap_'+f.id;
+   if(f.wide || f.type==='radio')wrap.classList.add('wide');
+   const label=document.createElement('label');label.id='label_'+f.id;const labelText=document.createElement('span');labelText.textContent=f.label;
+   const point=document.createElement('span');point.className='points'+(f.points===0?' none':'');point.textContent=f.points>0?fmt(fieldScore(f))+' pkt':(f.id==='bank_swift'?'opcjonalne':'niepunktowane');
+   label.append(labelText,point);
+   if(f.type!=='radio')label.htmlFor=f.id;
+   wrap.append(label);
+   if(f.type==='radio'){
+     const group=document.createElement('div');group.className='radio-options';group.setAttribute('role','radiogroup');group.setAttribute('aria-labelledby',label.id);
+     f.options.forEach((option,i)=>{
+       const pill=document.createElement('label');pill.className='radio-option';
+       const input=document.createElement('input');input.type='radio';input.name=f.id;input.id=f.id+'_'+i;input.value=option;
+       const span=document.createElement('span');span.textContent=option;pill.append(input,span);group.append(pill);
+       input.addEventListener('change',()=>{wrap.removeAttribute('data-status');document.getElementById('fb_'+f.id).textContent='';updateProgress();});
+     });wrap.append(group);
+   }else{
+    let input;
+    if(f.type==='select'){
+      input=document.createElement('select');f.options.forEach((choice,index)=>{
+        const item=document.createElement('option');item.value=choice;item.textContent=index===0?'— wybierz —':choice;input.append(item);
+      });
+    }else{
+      input=document.createElement('input');input.type=f.type==='date'?'text':f.type;
+      input.autocomplete='off';input.placeholder=f.type==='date'?'rrrr.mm.dd':(f.placeholder||'Wpisz wartość');
+      if(f.type==='date'){
+        input.inputMode='numeric';input.maxLength=10;input.setAttribute('pattern','[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}');
+        input.setAttribute('title','Wpisz datę w formacie rrrr.mm.dd, np. 2026.12.01');
+      }
+      if(f.minLength)input.minLength=f.minLength;
+      if(f.maxLength)input.maxLength=f.maxLength;
+      if(f.inputmode)input.inputMode=f.inputmode;
+    }
+    input.id=f.id;input.name=f.id;input.setAttribute('aria-labelledby',label.id);
+    input.addEventListener('input',()=>{wrap.removeAttribute('data-status');document.getElementById('fb_'+f.id).textContent='';if(f.id==='nip'||f.id==='regon')updateVisibility();else updateProgress();});
+    input.addEventListener('change',()=>{wrap.removeAttribute('data-status');document.getElementById('fb_'+f.id).textContent='';if(f.id==='nip'||f.id==='regon')updateVisibility();else updateProgress();});
+    if(f.type==='date'){
+      input.classList.add('date-display');
+      const dateLine=document.createElement('div');dateLine.className='date-line';
+      const pickerBtn=document.createElement('button');pickerBtn.type='button';pickerBtn.className='calendar-button';
+      pickerBtn.setAttribute('aria-label','Otwórz kalendarz dla: '+f.label);
+      pickerBtn.setAttribute('aria-expanded','false');
+      pickerBtn.title='Wybierz datę';pickerBtn.textContent='📅';
+      const picker=document.createElement('div');picker.className='date-calendar';picker.hidden=true;
+      picker.setAttribute('role','group');picker.setAttribute('aria-label','Wybór daty: '+f.label);
+      const monthNames=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+      const head=document.createElement('div');head.className='date-cal-head';
+      const prev=document.createElement('button');prev.type='button';prev.textContent='‹';prev.setAttribute('aria-label','Poprzedni miesiąc');
+      const monthSel=document.createElement('select');monthSel.setAttribute('aria-label','Miesiąc');
+      monthNames.forEach((name,i)=>{const opt=document.createElement('option');opt.value=String(i);opt.textContent=name;monthSel.append(opt);});
+      const yearSel=document.createElement('select');yearSel.setAttribute('aria-label','Rok');
+      for(let year=1900;year<=2100;year++){const opt=document.createElement('option');opt.value=String(year);opt.textContent=String(year);yearSel.append(opt);}
+      const next=document.createElement('button');next.type='button';next.textContent='›';next.setAttribute('aria-label','Następny miesiąc');
+      head.append(prev,monthSel,yearSel,next);
+      const days=document.createElement('div');days.className='date-cal-days';picker.append(head,days);
+      const close=()=>{picker.hidden=true;pickerBtn.setAttribute('aria-expanded','false');};
+      function drawDays(){
+        const yr=Number(yearSel.value),mo=Number(monthSel.value);
+        days.replaceChildren();
+        ['Pn','Wt','Śr','Cz','Pt','So','Nd'].forEach(name=>{
+          const cap=document.createElement('span');cap.className='day-caption';cap.textContent=name;days.append(cap);
+        });
+        const blanks=(new Date(Date.UTC(yr,mo,1)).getUTCDay()+6)%7;
+        for(let i=0;i<blanks;i++){const spacer=document.createElement('span');spacer.className='day-spacer';days.append(spacer);}
+        const monthDays=new Date(Date.UTC(yr,mo+1,0)).getUTCDate();
+        for(let d=1;d<=monthDays;d++){
+          const dayBtn=document.createElement('button');dayBtn.type='button';dayBtn.textContent=String(d);
+          const iso=String(yr).padStart(4,'0')+'.'+String(mo+1).padStart(2,'0')+'.'+String(d).padStart(2,'0');
+          if(input.value===iso)dayBtn.classList.add('selected');
+          dayBtn.setAttribute('aria-label','Wybierz '+iso);
+          dayBtn.addEventListener('click',()=>{input.value=iso;input.dispatchEvent(new Event('input',{bubbles:true}));close();input.focus();});
+          days.append(dayBtn);
+        }
+      }
+      function selectMonth(year,month){
+        const stamp=new Date(Date.UTC(year,month,1));
+        const bounded=Math.min(2100,Math.max(1900,stamp.getUTCFullYear()));
+        yearSel.value=String(bounded);monthSel.value=String(stamp.getUTCMonth());drawDays();
+      }
+      prev.addEventListener('click',()=>selectMonth(Number(yearSel.value),Number(monthSel.value)-1));
+      next.addEventListener('click',()=>selectMonth(Number(yearSel.value),Number(monthSel.value)+1));
+      monthSel.addEventListener('change',drawDays);yearSel.addEventListener('change',drawDays);
+      pickerBtn.addEventListener('click',()=>{
+        if(firstResult)return;
+        const wasOpen=!picker.hidden;
+        document.querySelectorAll('.date-calendar').forEach(el=>el.hidden=true);
+        document.querySelectorAll('.calendar-button').forEach(el=>el.setAttribute('aria-expanded','false'));
+        if(wasOpen)return;
+        const parsed=isValidDate(input.value)?input.value.split('.').map(Number):null;
+        const now=new Date();
+        selectMonth(parsed?parsed[0]:now.getFullYear(),parsed?parsed[1]-1:now.getMonth());
+        picker.hidden=false;pickerBtn.setAttribute('aria-expanded','true');
+      });
+      dateLine.append(input,pickerBtn,picker);wrap.append(dateLine);
+    }else wrap.append(input);
+    inputMap.set(f.id,input);
+   }
+   if(f.help){let helper=document.createElement('p');helper.className='field-help';helper.textContent=f.help;wrap.append(helper);}
+   if(f.id==='pkd'){
+     const guide=document.createElement('div');guide.className='pkd-field-help';
+     const link=document.createElement('a');link.href='https://klasyfikacje.stat.gov.pl/Pkd2025';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Otwórz wyszukiwarkę kodów PKD 2025';
+     guide.append(link);wrap.append(guide);
+   }
+   const feedback=document.createElement('div');feedback.className='feedback';feedback.id='fb_'+f.id;feedback.setAttribute('aria-live','polite');wrap.append(feedback);
+   if(f.dependsOn)wrap.hidden=true;
+   if(f.id==='dor_adresat'){
+     wrap.classList.add('recipient-row');section.append(wrap);
+   } else if(PAIR_START.has(f.id)){
+     const row=document.createElement('div');row.className='personal-pair';row.id='pair_'+f.id;
+     grid.append(row);row.append(wrap);
+   } else if(PAIR_END.has(f.id)){
+     grid.querySelector('#pair_'+PAIR_END.get(f.id)).append(wrap);
+   } else if(f.id==='nip'||f.id==='regon'){
+     const line=document.createElement('div');line.className='identifier-line';line.id='line_'+f.id;
+     grid.append(line);line.append(wrap);
+   } else if(f.id==='nip_numer'||f.id==='regon_numer'){
+     grid.querySelector('#line_'+f.dependsOn).append(wrap);
+   } else grid.append(wrap);
+  }
+  section.append(grid);container.append(section);
+ }
+ updateVisibility();
+ document.getElementById('pointsDetail').textContent=REQUIRED_GRADED.length+' pól ocenianych w tym przypadku, łącznie 15,00 pkt. Punkty są przyznawane za poprawne odpowiedzi, bez punktów ujemnych.';
+ document.getElementById('fieldDescription').textContent='Symulator edukacyjny CEIDG-1 (3.3): wybrane sekcje w oryginalnej numeracji. '+FIELDS.length+' rubryk, '+REQUIRED_GRADED.length+' ocenianych w tym zadaniu; maksymalnie 15 pkt. Nie jest to wniosek urzędowy.';
+}
+function isCorrect(f,value){
+ if(!isActive(f))return null;
+ if(f.dependsOn && FIELDS.find(x=>x.id===f.dependsOn).answer!==f.visibleWhen)return false;
+ if(f.type==='date' && !isValidDate(value))return false;
+ if(f.id==='pkd'){
+   // Pozwalamy wpisać zapis z kropkami albo bez, sprawdzając pełną podklasę PKD 2025.
+   if(!/^\d{2}\.?\d{2}\.?[A-Za-z]$/.test(value))return false;
+ }
+ if(f.id==='bank_numer' && (value.length<5 || value.length>26))return false;
+ if(f.id==='nip_numer')return /^\d{10}$/.test(value.replace(/[- ]/g,''));
+ if(f.id==='regon_numer')return /^(\d{9}|\d{14})$/.test(value.replace(/[ -]/g,''));
+ if(f.id==='zus_data' && value!==getValue(FIELDS.find(x=>x.id==='start')))return false;
+ return value!=='' && clean(value)===clean(f.answer);
+}
+function evaluate(){
+ const rows=FIELDS.filter(isActive).map(f=>{
+   const value=getValue(f).trim();const ok=isCorrect(f,value);
+   return {...f,value,ok,earned:ok?fieldScore(f):0,maxScore:fieldScore(f)};
+ });
+ return {rows,score:Math.min(15,Math.round(rows.reduce((sum,row)=>sum+row.earned,0)*100)/100)};
+}
+function showFeedback(res){
+ for(const row of res.rows){
+  const wrap=document.getElementById('wrap_'+row.id),fback=document.getElementById('fb_'+row.id);
+  if(!row.points){wrap.removeAttribute('data-status');fback.textContent='';continue;}
+  wrap.dataset.status=row.ok?'ok':'bad';
+  fback.textContent=row.ok?'Poprawnie: +'+fmt(row.earned)+' pkt':'Bez punktów za to pole (bez punktów ujemnych)';
+ }
+}
+function makeReport(){
+ if(!firstResult)return;
+ document.getElementById('reportStudent').textContent='Uczeń: '+document.getElementById('studentName').value.trim()+' '+document.getElementById('studentSurname').value.trim();
+ document.getElementById('reportClass').textContent='Klasa: '+document.getElementById('studentClass').value.trim();
+ document.getElementById('reportDate').textContent='Data wydruku: '+displayDate();
+ document.getElementById('reportGrade').textContent='Wynik pierwszego sprawdzenia: '+fmt(firstResult.score)+' / 15,00 pkt';
+ document.getElementById('reportAfter').textContent='Odpowiedzi zostały zablokowane w chwili pierwszego sprawdzenia. Punktacja zgodna z kartą przypadku.';
+ const table=document.getElementById('reportRows');table.replaceChildren();
+ firstResult.rows.forEach(row=>{
+   const tr=document.createElement('tr');
+   for(const text of [row.label,row.value||'[brak odpowiedzi]',row.points?fmt(row.earned)+' / '+fmt(row.maxScore):(row.id==='bank_swift'?'opcjonalne':'niepunktowane')]){
+     const td=document.createElement('td');td.textContent=text;tr.append(td);
+   }
+   table.append(tr);
+ });
+}
+function check(){
+ if(firstResult)return;
+ const missing=['studentName','studentSurname','studentClass'].filter(id=>!document.getElementById(id).value.trim());
+ document.getElementById('studentError').hidden=!missing.length;
+ if(missing.length){document.getElementById('studentInfo').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById(missing[0]).focus();return;}
+ if(!window.confirm('Zakończyć ćwiczenie i sprawdzić wniosek? Po kliknięciu OK nie będzie można już poprawić odpowiedzi w tym otwartym formularzu.'))return;
+ const result=evaluate();
+ firstResult=result;
+ showFeedback(firstResult);
+ document.querySelectorAll('.form-section input,.form-section select,.form-section button').forEach(input=>input.disabled=true);
+ document.querySelectorAll('.date-calendar').forEach(el=>el.hidden=true);
+ ['studentName','studentSurname','studentClass'].forEach(id=>document.getElementById(id).readOnly=true);
+ document.getElementById('scorebox').style.display='block';
+ document.getElementById('firstScore').textContent=fmt(result.score)+' / 15,00 pkt';
+ document.getElementById('currentScore').textContent='Wynik ostateczny. Możesz zapisać raport jako PDF.';
+ document.getElementById('report').disabled=false;
+ document.getElementById('check').disabled=true;
+ document.getElementById('check').textContent='Wniosek zakończony';
+ document.getElementById('checkMobile').hidden=true;
+ document.getElementById('reportMobile').hidden=false;
+ document.getElementById('reset').disabled=true;
+ makeReport();updateProgress();
+ document.getElementById('scorebox').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function printMode(mode){document.body.dataset.print=mode;makeReport();window.print();}
+window.addEventListener('afterprint',()=>document.body.removeAttribute('data-print'));
+function reset(){
+ if(firstResult || !window.confirm('Wyczyścić cały formularz i rozpocząć od początku?'))return;
+ for(const f of FIELDS)setValue(f,'');
+ document.querySelectorAll('.field').forEach(w=>w.removeAttribute('data-status'));
+ document.querySelectorAll('.feedback').forEach(f=>f.textContent='');
+ ['studentName','studentSurname','studentClass'].forEach(id=>document.getElementById(id).value='');
+ document.getElementById('studentError').hidden=true;
+ updateVisibility();window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('click',event=>{
+ if(event.target.closest('.date-line'))return;
+ document.querySelectorAll('.date-calendar').forEach(el=>el.hidden=true);
+ document.querySelectorAll('.calendar-button').forEach(el=>el.setAttribute('aria-expanded','false'));
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){
+   document.querySelectorAll('.date-calendar').forEach(el=>el.hidden=true);
+   document.querySelectorAll('.calendar-button').forEach(el=>el.setAttribute('aria-expanded','false'));
+ }
+});
+document.getElementById('check').addEventListener('click',check);
+document.getElementById('checkMobile').addEventListener('click',check);
+document.getElementById('report').addEventListener('click',()=>printMode('report'));
+document.getElementById('reportMobile').addEventListener('click',()=>printMode('report'));
+document.getElementById('worksheet').addEventListener('click',()=>printMode('worksheet'));
+document.getElementById('reset').addEventListener('click',reset);
+const caseDialog=document.getElementById('caseDialog');
+const caseClone=document.getElementById('caseDescription').cloneNode(true);caseClone.removeAttribute('id');
+document.getElementById('caseDialogContent').append(caseClone);
+function openCase(){caseDialog.showModal();}
+document.getElementById('caseMobile').addEventListener('click',openCase);
+document.getElementById('caseInline').addEventListener('click',openCase);
+document.getElementById('caseClose').addEventListener('click',()=>caseDialog.close());
+caseDialog.addEventListener('click',e=>{if(e.target===caseDialog)caseDialog.close();});
+// Karta przypadku jest drukowana wraz z pustym formularzem dla nieobecnych.
+document.getElementById('casePrint').innerHTML='<div class="print-student"><span>Imię ucznia: ........................................</span><span>Nazwisko: ........................................</span><span>Klasa: .................</span></div>'+document.getElementById('caseDescription').innerHTML;
+render();
+
+</script>
+</body></html>
