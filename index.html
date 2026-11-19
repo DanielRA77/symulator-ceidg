@@ -187,6 +187,10 @@ button[disabled]{opacity:.45;cursor:not-allowed}
 @media(max-width:820px){.personal-pair{gap:10px}}
 @media(max-width:420px){.personal-pair{gap:9px}.personal-pair .field label{font-size:12px}}
 @media print{.personal-pair{gap:7px 16px;break-inside:avoid}}
+
+.storage-notice{font-size:11.5px;color:#444;background:#f7f7f7;border-left:3px solid #666;padding:9px 10px;line-height:1.4;margin:8px 0 0}
+.storage-notice.storage-error{color:#8a2525;border-left-color:#ad2525;background:#fff4f4}
+@media print{.storage-notice{display:none!important}}
 </style>
 </head>
 <body>
@@ -214,13 +218,14 @@ button[disabled]{opacity:.45;cursor:not-allowed}
 <p><strong>e-Doręczenia:</strong> Katarzyna wnioskuje o utworzenie adresu u publicznego dostawcy.</p>
 <p><strong>Ubezpieczenie:</strong> Zakład Ubezpieczeń Społecznych. Katarzyna nie korzysta z ulgi na start i od dnia rozpoczęcia działalności podlega ubezpieczeniom społecznym oraz zdrowotnemu.</p>
 <p><strong>Biuro rachunkowe:</strong> dokumentację rachunkową prowadzi <strong>Biuro Rachunkowe Liczydło sp. z o.o.</strong>, NIP <strong>7468250138</strong>.</p>
-<p><strong>Rachunek firmowy:</strong> kraj banku <strong>Polska</strong>; pełna nazwa banku <strong>Bank Akademicki S.A.</strong>; posiadacz rachunku <strong>Katarzyna Malinowska KADR Studio Graficzne</strong>; numer rachunku <strong>04000000000000000000000000</strong>.</p>
+<p><strong>Rachunek firmowy:</strong> kraj banku <strong>Polska</strong>; pełna nazwa banku <strong>Bank Akademicki S.A.</strong>; posiadacz rachunku <strong>Katarzyna Malinowska</strong>; numer rachunku <strong>04000000000000000000000000</strong>.</p>
 <p><strong>Podatek:</strong> opodatkowanie na zasadach ogólnych (skala podatkowa).</p>
 <p><strong>Oświadczenie:</strong> wobec Katarzyny nie orzeczono wskazanych prawem zakazów prowadzenia działalności i posiada ona tytuł prawny do nieruchomości, których adresy poda we wniosku. Potwierdza pouczenie o odpowiedzialności karnej.</p>
 </div></div>
 <button class="mobile-case-open" type="button" id="caseInline" aria-haspopup="dialog">Otwórz kartę przedsiębiorcy</button>
 
 <div class="status"><div><strong id="filled">0</strong> / <span id="fieldTotal">68</span> widocznych pól wypełnionych</div><div class="bar"><span id="progress"></span></div><span class="small">Punktacja: <span id="pointsDetail">maksymalnie 15,00 pkt.</span></span></span></div>
+<p id="storageNotice" class="storage-notice" role="status" aria-live="polite">Wprowadzane dane i wynik są automatycznie zachowywane w tej przeglądarce.</p>
 <div id="scorebox" role="status" aria-live="polite"><h2>Wynik końcowy — wniosek zamknięty</h2><div class="score" id="firstScore">—</div><div id="currentScore"></div><div class="helper" style="margin-top:8px">Po zatwierdzeniu wniosku nie można już zmieniać odpowiedzi ani ponownie go sprawdzać. Błędne pola są oznaczone, ale poprawne odpowiedzi nie są ujawniane.</div></div>
 <p class="footer-note">Plik działa lokalnie, bez internetu, bez konta i bez wysyłania danych do CEIDG. Do zapisania raportu jako PDF wybierz „Wydrukuj wynik / PDF”, a następnie w oknie drukowania wybierz „Zapisz jako PDF”.</p>
 </aside>
@@ -233,7 +238,7 @@ button[disabled]{opacity:.45;cursor:not-allowed}
 <script>
 
 'use strict';
-const SECTIONS=[{"key":"kind","title":"1. Rodzaj wniosku","fields":[{"id":"typ","label":"Rodzaj wniosku","type":"select","answer":"Wniosek o wpis do CEIDG","points":0.41,"options":["","Wniosek o wpis do CEIDG","Wniosek o zmianę wpisu w CEIDG","Wniosek o zawieszenie wykonywania działalności gospodarczej","Wniosek o wznowienie wykonywania działalności gospodarczej","Wniosek o wykreślenie przedsiębiorcy z CEIDG"]}]},{"key":"person","title":"2. Dane wnioskodawcy / przedsiębiorcy","fields":[{"id":"plec","label":"Płeć","type":"select","answer":"Kobieta","points":0.2,"options":["","Kobieta","Mężczyzna"]},{"id":"nazwisko","label":"Nazwisko","type":"text","answer":"Malinowska","points":0.19},{"id":"imie","label":"Pierwsze imię","type":"text","answer":"Katarzyna","points":0.19},{"id":"drugie_imie","label":"Drugie imię","type":"text","answer":"Maria","points":0},{"id":"nazwisko_rodowe","label":"Nazwisko rodowe","type":"text","answer":"Malinowska","points":0},{"id":"ojciec","label":"Imię ojca","type":"text","answer":"Andrzej","points":0.2},{"id":"matka","label":"Imię matki","type":"text","answer":"Joanna","points":0.2},{"id":"miejsce_ur","label":"Miejsce urodzenia","type":"text","answer":"Tychy","points":0.2},{"id":"data_ur","label":"Data urodzenia (rrrr.mm.dd)","type":"date","answer":"1998.04.17","points":0.19},{"id":"pesel","label":"PESEL","type":"text","answer":"98041712340","points":0.19},{"id":"dokument","label":"Rodzaj dokumentu tożsamości","type":"select","answer":"Dowód osobisty","points":0.2,"options":["","Dowód osobisty","Paszport","Inny"]},{"id":"nr_dokumentu","label":"Seria i numer dokumentu","type":"text","answer":"AYA000000","points":0.2},{"id":"obywat","label":"Posiadane obywatelstwo","type":"select","answer":"Polskie","points":0.2,"options":["","Polskie","Inne","Nie posiadam obywatelstwa"]},{"id":"nip","label":"NIP — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"nip_numer","label":"Numer NIP","type":"text","answer":"","points":0.2,"dependsOn":"nip","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":10,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 10 cyfr numeru NIP."},{"id":"regon","label":"REGON — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"regon_numer","label":"Numer REGON","type":"text","answer":"","points":0.2,"dependsOn":"regon","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":14,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 9 lub 14 cyfr numeru REGON."}]},{"key":"statement","title":"3. Oświadczenie","fields":[{"id":"oswiadczenie","label":"Potwierdzam złożenie powyższego oświadczenia","type":"select","answer":"Tak","points":0.41,"options":["","Tak","Nie"]}]},{"key":"home","title":"4. Adres zamieszkania","fields":[{"id":"zam_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"zam_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"zam_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"zam_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"zam_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"zam_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"zam_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"zam_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"zam_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"zam_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"contact","title":"5. Dane do kontaktu","fields":[{"id":"email","label":"Adres e-mail","type":"email","answer":"kadr.studio@example.com","points":0.2}]},{"key":"firm","title":"6. Dane firmy","fields":[{"id":"firma","label":"Nazwa firmy przedsiębiorcy","type":"text","answer":"Katarzyna Malinowska KADR Studio Graficzne","points":0.2,"wide":true},{"id":"skrot","label":"Nazwa skrócona","type":"text","answer":"KADR","points":0.2},{"id":"start","label":"Data rozpoczęcia działalności (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"liczba","label":"Przewidywana liczba pracujących (w tym przedsiębiorczyni)","type":"text","answer":"1","points":0.2},{"id":"pkd","label":"Przeważający kod PKD 2025","type":"text","answer":"74.12.Z","points":0.41,"placeholder":"np. 12.34.Z","help":"Zachowaj kropki i literę; dopuszczane są także zapisy bez kropek. Wyszukaj kod w GUS."}]},{"key":"delivery","title":"7. Adres do doręczeń","fields":[{"id":"dor_adresat","label":"Adresat","type":"text","answer":"Katarzyna Malinowska","points":0.2},{"id":"dor_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"dor_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"dor_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"dor_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"dor_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"dor_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"dor_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"dor_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"dor_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"dor_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"place","title":"8. Stałe miejsce wykonywania działalności gospodarczej","fields":[{"id":"miejsce_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"miejsce_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"miejsce_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_ulica","label":"Ulica","type":"text","answer":"Fabryczna","points":0.2},{"id":"miejsce_budynek","label":"Numer nieruchomości","type":"text","answer":"8","points":0.2},{"id":"miejsce_lokal","label":"Numer lokalu","type":"text","answer":"2","points":0.2},{"id":"miejsce_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"miejsce_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"eDelivery","title":"10. Adres do e-Doręczeń","fields":[{"id":"edorecz","label":"Wybór dotyczący adresu do e-Doręczeń","type":"select","answer":"Wnioskuję o utworzenie u publicznego dostawcy","points":0.41,"options":["","Wnioskuję o utworzenie u publicznego dostawcy","Posiadam adres u niepublicznego dostawcy","Nie dotyczy"]}]},{"key":"insurance","title":"11. Podlegam obowiązkowemu ubezpieczeniu","fields":[{"id":"zus","label":"Instytucja ubezpieczeniowa","type":"select","answer":"Zakład Ubezpieczeń Społecznych","points":0.41,"options":["","Zakład Ubezpieczeń Społecznych","Kasa Rolniczego Ubezpieczenia Społecznego","Jestem ubezpieczony za granicą"]},{"id":"zus_data","label":"Data powstania obowiązku opłacania składek ZUS (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"zus_zgloszenie","label":"Dołączam zgłoszenia ZUS","type":"radio","answer":"ZUA","points":0.41,"options":["ZZA","ZWUA","ZUA","ZIUA","ZCNA"]}]},{"key":"tax","title":"16. Oświadczenie o formie opłacania podatku dochodowego","fields":[{"id":"podatek","label":"Forma opłacania podatku dochodowego","type":"select","answer":"Na zasadach ogólnych (skala podatkowa)","points":0.41,"options":["","Na zasadach ogólnych (skala podatkowa)","Podatek liniowy","Ryczałt od przychodów ewidencjonowanych"]}]},{"key":"bookkeeping","title":"18.1. Dane podmiotu prowadzącego dokumentację rachunkową","fields":[{"id":"ksiegowa_firma","label":"Firma","type":"text","answer":"Biuro Rachunkowe Liczydło sp. z o.o.","points":0.41,"wide":true},{"id":"ksiegowa_nip","label":"NIP","type":"text","answer":"7468250138","points":0.2,"inputmode":"numeric"}]},{"key":"bank","title":"22.1. Rachunek firmowy (związany z działalnością gospodarczą)","fields":[{"id":"bank_kraj","label":"Kraj siedziby banku (oddziału)","type":"text","answer":"Polska","points":0.19},{"id":"bank_swift","label":"Kod SWIFT (opcjonalnie, tylko dla zagranicznego rachunku)","type":"text","answer":"","points":0},{"id":"bank_nazwa","label":"Pełna nazwa banku (oddziału)","type":"text","answer":"Bank Akademicki S.A.","points":0.2},{"id":"bank_posiadacz","label":"Posiadacz rachunku","type":"text","answer":"Katarzyna Malinowska KADR Studio Graficzne","points":0.2,"wide":true},{"id":"bank_numer","label":"Numer rachunku (od 5 do 26 znaków)","type":"text","answer":"04000000000000000000000000","points":0.19,"minLength":5,"maxLength":26}]},{"key":"civil","title":"23. Forma prowadzenia działalności","fields":[{"id":"cywilna","label":"Forma prowadzenia działalności","type":"radio","answer":"Prowadzę działalność indywidualnie","points":0.41,"options":["Prowadzę działalność indywidualnie","Prowadzę działalność indywidualnie i w formie spółki cywilnej","Prowadzę działalność w formie spółki cywilnej"]}]}];
+const SECTIONS=[{"key":"kind","title":"1. Rodzaj wniosku","fields":[{"id":"typ","label":"Rodzaj wniosku","type":"select","answer":"Wniosek o wpis do CEIDG","points":0.41,"options":["","Wniosek o wpis do CEIDG","Wniosek o zmianę wpisu w CEIDG","Wniosek o zawieszenie wykonywania działalności gospodarczej","Wniosek o wznowienie wykonywania działalności gospodarczej","Wniosek o wykreślenie przedsiębiorcy z CEIDG"]}]},{"key":"person","title":"2. Dane wnioskodawcy / przedsiębiorcy","fields":[{"id":"plec","label":"Płeć","type":"select","answer":"Kobieta","points":0.2,"options":["","Kobieta","Mężczyzna"]},{"id":"nazwisko","label":"Nazwisko","type":"text","answer":"Malinowska","points":0.19},{"id":"imie","label":"Pierwsze imię","type":"text","answer":"Katarzyna","points":0.19},{"id":"drugie_imie","label":"Drugie imię","type":"text","answer":"Maria","points":0},{"id":"nazwisko_rodowe","label":"Nazwisko rodowe","type":"text","answer":"Malinowska","points":0},{"id":"ojciec","label":"Imię ojca","type":"text","answer":"Andrzej","points":0.2},{"id":"matka","label":"Imię matki","type":"text","answer":"Joanna","points":0.2},{"id":"miejsce_ur","label":"Miejsce urodzenia","type":"text","answer":"Tychy","points":0.2},{"id":"data_ur","label":"Data urodzenia (rrrr.mm.dd)","type":"date","answer":"1998.04.17","points":0.19},{"id":"pesel","label":"PESEL","type":"text","answer":"98041712340","points":0.19},{"id":"dokument","label":"Rodzaj dokumentu tożsamości","type":"select","answer":"Dowód osobisty","points":0.2,"options":["","Dowód osobisty","Paszport","Inny"]},{"id":"nr_dokumentu","label":"Seria i numer dokumentu","type":"text","answer":"AYA000000","points":0.2},{"id":"obywat","label":"Posiadane obywatelstwo","type":"select","answer":"Polskie","points":0.2,"options":["","Polskie","Inne","Nie posiadam obywatelstwa"]},{"id":"nip","label":"NIP — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"nip_numer","label":"Numer NIP","type":"text","answer":"","points":0.2,"dependsOn":"nip","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":10,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 10 cyfr numeru NIP."},{"id":"regon","label":"REGON — status","type":"select","answer":"Nie posiadam","points":0.41,"options":["","Nie posiadam","Posiadam"]},{"id":"regon_numer","label":"Numer REGON","type":"text","answer":"","points":0.2,"dependsOn":"regon","visibleWhen":"Posiadam","inputmode":"numeric","maxLength":14,"help":"Jeśli zaznaczysz „Posiadam”, wpisz 9 lub 14 cyfr numeru REGON."}]},{"key":"statement","title":"3. Oświadczenie","fields":[{"id":"oswiadczenie","label":"Potwierdzam złożenie powyższego oświadczenia","type":"select","answer":"Tak","points":0.41,"options":["","Tak","Nie"]}]},{"key":"home","title":"4. Adres zamieszkania","fields":[{"id":"zam_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"zam_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"zam_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"zam_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"zam_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"zam_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"zam_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"zam_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"zam_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"zam_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"contact","title":"5. Dane do kontaktu","fields":[{"id":"email","label":"Adres e-mail","type":"email","answer":"kadr.studio@example.com","points":0.2}]},{"key":"firm","title":"6. Dane firmy","fields":[{"id":"firma","label":"Nazwa firmy przedsiębiorcy","type":"text","answer":"Katarzyna Malinowska KADR Studio Graficzne","points":0.2,"wide":true},{"id":"skrot","label":"Nazwa skrócona","type":"text","answer":"KADR","points":0.2},{"id":"start","label":"Data rozpoczęcia działalności (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"liczba","label":"Przewidywana liczba pracujących (w tym przedsiębiorczyni)","type":"text","answer":"1","points":0.2},{"id":"pkd","label":"Przeważający kod PKD 2025","type":"text","answer":"74.12.Z","points":0.41,"placeholder":"np. 12.34.Z","help":"Możesz wpisać kod z kropkami lub bez kropek."}]},{"key":"delivery","title":"7. Adres do doręczeń","fields":[{"id":"dor_adresat","label":"Adresat","type":"text","answer":"Katarzyna Malinowska","points":0.2},{"id":"dor_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"dor_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"dor_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"dor_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"dor_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"dor_ulica","label":"Ulica","type":"text","answer":"Jaśminowa","points":0.2},{"id":"dor_budynek","label":"Numer nieruchomości","type":"text","answer":"12","points":0.2},{"id":"dor_lokal","label":"Numer lokalu","type":"text","answer":"4","points":0.2},{"id":"dor_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"dor_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"place","title":"8. Stałe miejsce wykonywania działalności gospodarczej","fields":[{"id":"miejsce_kraj","label":"Kraj","type":"text","answer":"Polska","points":0.2},{"id":"miejsce_woj","label":"Województwo","type":"text","answer":"Śląskie","points":0.2},{"id":"miejsce_powiat","label":"Powiat","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_gmina","label":"Gmina","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_miasto","label":"Miejscowość","type":"text","answer":"Tychy","points":0.2},{"id":"miejsce_ulica","label":"Ulica","type":"text","answer":"Fabryczna","points":0.2},{"id":"miejsce_budynek","label":"Numer nieruchomości","type":"text","answer":"8","points":0.2},{"id":"miejsce_lokal","label":"Numer lokalu","type":"text","answer":"2","points":0.2},{"id":"miejsce_kod","label":"Kod pocztowy","type":"text","answer":"43-100","points":0.19},{"id":"miejsce_poczta","label":"Poczta","type":"text","answer":"Tychy","points":0.2}]},{"key":"eDelivery","title":"10. Adres do e-Doręczeń","fields":[{"id":"edorecz","label":"Wybór dotyczący adresu do e-Doręczeń","type":"select","answer":"Wnioskuję o utworzenie u publicznego dostawcy","points":0.41,"options":["","Wnioskuję o utworzenie u publicznego dostawcy","Posiadam adres u niepublicznego dostawcy","Nie dotyczy"]}]},{"key":"insurance","title":"11. Podlegam obowiązkowemu ubezpieczeniu","fields":[{"id":"zus","label":"Instytucja ubezpieczeniowa","type":"select","answer":"Zakład Ubezpieczeń Społecznych","points":0.41,"options":["","Zakład Ubezpieczeń Społecznych","Kasa Rolniczego Ubezpieczenia Społecznego","Jestem ubezpieczony za granicą"]},{"id":"zus_data","label":"Data powstania obowiązku opłacania składek ZUS (rrrr.mm.dd)","type":"date","answer":"2026.12.01","points":0.19},{"id":"zus_zgloszenie","label":"Dołączam zgłoszenia ZUS","type":"radio","answer":"ZUA","points":0.41,"options":["ZZA","ZWUA","ZUA","ZIUA","ZCNA"]}]},{"key":"tax","title":"16. Oświadczenie o formie opłacania podatku dochodowego","fields":[{"id":"podatek","label":"Forma opłacania podatku dochodowego","type":"select","answer":"Na zasadach ogólnych (skala podatkowa)","points":0.41,"options":["","Na zasadach ogólnych (skala podatkowa)","Podatek liniowy","Ryczałt od przychodów ewidencjonowanych"]}]},{"key":"bookkeeping","title":"18.1. Dane podmiotu prowadzącego dokumentację rachunkową","fields":[{"id":"ksiegowa_firma","label":"Firma","type":"text","answer":"Biuro Rachunkowe Liczydło sp. z o.o.","points":0.41,"wide":true},{"id":"ksiegowa_nip","label":"NIP","type":"text","answer":"7468250138","points":0.2,"inputmode":"numeric"}]},{"key":"bank","title":"22.1. Rachunek firmowy (związany z działalnością gospodarczą)","fields":[{"id":"bank_kraj","label":"Kraj siedziby banku (oddziału)","type":"text","answer":"Polska","points":0.19},{"id":"bank_swift","label":"Kod SWIFT (opcjonalnie, tylko dla zagranicznego rachunku)","type":"text","answer":"","points":0},{"id":"bank_nazwa","label":"Pełna nazwa banku (oddziału)","type":"text","answer":"Bank Akademicki S.A.","points":0.2},{"id":"bank_posiadacz","label":"Posiadacz rachunku","type":"text","answer":"Katarzyna Malinowska","points":0.2,"wide":true},{"id":"bank_numer","label":"Numer rachunku (od 5 do 26 znaków)","type":"text","answer":"04000000000000000000000000","points":0.19,"minLength":5,"maxLength":26}]},{"key":"civil","title":"23. Forma prowadzenia działalności","fields":[{"id":"cywilna","label":"Forma prowadzenia działalności","type":"radio","answer":"Prowadzę działalność indywidualnie","points":0.41,"options":["Prowadzę działalność indywidualnie","Prowadzę działalność indywidualnie i w formie spółki cywilnej","Prowadzę działalność w formie spółki cywilnej"]}]}];
 const STMT="Oświadczam, że wobec osoby, której wpis dotyczy, nie orzeczono prawomocnie zakazów, o których mowa w art. 5 ust. 2 pkt 13-15 ustawy z dnia 6 marca 2018 r. o Centralnej Ewidencji i Informacji o Działalności Gospodarczej i Punkcie Informacji dla Przedsiębiorcy w zakresie działalności gospodarczej objętej wpisem, oraz, że osoba, której wpis dotyczy, posiada tytuł prawny do nieruchomości, których adresy są wpisywane do CEIDG. Jestem świadomy odpowiedzialności karnej za złożenie fałszywego oświadczenia.";
 const FIELDS=SECTIONS.flatMap(s=>s.fields);
 // Wszystkie wymagane pola są sprawdzane. Dwa pola osobowe pozostają niepunktowane,
@@ -257,6 +262,62 @@ if(!RAW_TOTAL || new Set(FIELDS.map(f=>f.id)).size!==FIELDS.length || CENT_SPLIT
 const REF_CODES=new Set(['ZZA','ZWUA','ZUA','ZIUA','ZCNA']);
 let firstResult=null;
 const inputMap=new Map();
+const STORAGE_KEY='symulator-ceidg1-v3.3-saved-work-v1';
+let storageEnabled=true;
+const STUDENT_IDS=['studentName','studentSurname','studentClass'];
+function showStorageNotice(message,failed=false){
+ const node=document.getElementById('storageNotice');
+ if(!node)return;
+ node.textContent=message;node.classList.toggle('storage-error',failed);
+}
+function readStoredWork(){
+ try{
+   const raw=window.localStorage.getItem(STORAGE_KEY);
+   return raw?JSON.parse(raw):null;
+ }catch(error){
+   storageEnabled=false;
+   showStorageNotice('W tej przeglądarce nie można przechowywać odpowiedzi. Przed zamknięciem zapisz raport do PDF.',true);
+   return null;
+ }
+}
+function persistWork(){
+ if(!storageEnabled)return false;
+ const values=Object.fromEntries(FIELDS.map(f=>[f.id,getValue(f)]));
+ const student=Object.fromEntries(STUDENT_IDS.map(id=>[id,document.getElementById(id).value]));
+ const payload={version:1,values,student,firstResult,storedAt:Date.now()};
+ try{
+   window.localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
+   if(firstResult)showStorageNotice('Wynik i odpowiedzi zapisano w tej przeglądarce. Odświeżenie strony nie odblokuje formularza.');
+   else showStorageNotice('Odpowiedzi zapisują się automatycznie w tej przeglądarce (na tym urządzeniu).');
+   return true;
+ }catch(error){
+   storageEnabled=false;
+   showStorageNotice('Brak możliwości zapisania odpowiedzi w tej przeglądarce. Zapisz raport do PDF, aby nie utracić wyniku.',true);
+   return false;
+ }
+}
+function clearStoredWork(){
+ try{window.localStorage.removeItem(STORAGE_KEY);}catch(error){/* pamięć niedostępna */}
+}
+function restoreStoredWork(){
+ const saved=readStoredWork();
+ if(!saved || saved.version!==1 || !saved.values || !saved.student)return;
+ for(const f of FIELDS){
+   if(typeof saved.values[f.id]==='string')setValue(f,saved.values[f.id]);
+ }
+ for(const id of STUDENT_IDS){
+   if(typeof saved.student[id]==='string')document.getElementById(id).value=saved.student[id];
+ }
+ updateVisibility();
+ if(saved.firstResult && Number.isFinite(saved.firstResult.score) && Array.isArray(saved.firstResult.rows)){
+    firstResult=saved.firstResult;
+    lockAndShowResult(true);
+    showStorageNotice('Przywrócono zapisany wynik: '+fmt(firstResult.score)+' / 15,00 pkt. Formularz pozostaje zablokowany.');
+ }else{
+    showStorageNotice('Przywrócono wcześniej wypełnione odpowiedzi. Możesz kontynuować pracę.');
+ }
+}
+
 const fmt=n=>Number(n).toFixed(2).replace('.',',');
 const clean=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const DOTTED_DATE=/^\d{4}\.\d{2}\.\d{2}$/;
@@ -434,14 +495,14 @@ function isCorrect(f,value){
  if(f.dependsOn && FIELDS.find(x=>x.id===f.dependsOn).answer!==f.visibleWhen)return false;
  if(f.type==='date' && !isValidDate(value))return false;
  if(f.id==='pkd'){
-   // Pozwalamy wpisać zapis z kropkami albo bez, sprawdzając pełną podklasę PKD 2025.
-   if(!/^\d{2}\.?\d{2}\.?[A-Za-z]$/.test(value))return false;
+   // Obydwa zapisy PKD (np. 74.12.Z i 7412Z) oceniamy jednakowo.
+   return /^\d{2}\.?\d{2}\.?[A-Za-z]$/.test(value) && clean(value)===clean(f.answer);
  }
  if(f.id==='bank_numer' && (value.length<5 || value.length>26))return false;
  if(f.id==='nip_numer')return /^\d{10}$/.test(value.replace(/[- ]/g,''));
  if(f.id==='regon_numer')return /^(\d{9}|\d{14})$/.test(value.replace(/[ -]/g,''));
  if(f.id==='zus_data' && value!==getValue(FIELDS.find(x=>x.id==='start')))return false;
- return value!=='' && clean(value)===clean(f.answer);
+ return value!=='' && [f.answer,...(f.alsoAccept||[])].some(answer=>clean(value)===clean(answer));
 }
 function evaluate(){
  const rows=FIELDS.filter(isActive).map(f=>{
@@ -482,13 +543,18 @@ function check(){
  if(!window.confirm('Zakończyć ćwiczenie i sprawdzić wniosek? Po kliknięciu OK nie będzie można już poprawić odpowiedzi w tym otwartym formularzu.'))return;
  const result=evaluate();
  firstResult=result;
+ persistWork(); // zapis wyniku i odpowiedzi następuje przed zakończeniem obsługi kliknięcia
+ lockAndShowResult(false);
+}
+function lockAndShowResult(restored){
+ if(!firstResult)return;
  showFeedback(firstResult);
  document.querySelectorAll('.form-section input,.form-section select,.form-section button').forEach(input=>input.disabled=true);
  document.querySelectorAll('.date-calendar').forEach(el=>el.hidden=true);
- ['studentName','studentSurname','studentClass'].forEach(id=>document.getElementById(id).readOnly=true);
+ STUDENT_IDS.forEach(id=>document.getElementById(id).readOnly=true);
  document.getElementById('scorebox').style.display='block';
- document.getElementById('firstScore').textContent=fmt(result.score)+' / 15,00 pkt';
- document.getElementById('currentScore').textContent='Wynik ostateczny. Możesz zapisać raport jako PDF.';
+ document.getElementById('firstScore').textContent=fmt(firstResult.score)+' / 15,00 pkt';
+ document.getElementById('currentScore').textContent=restored?'Przywrócono zapisany wynik. Możesz zapisać raport jako PDF.':'Wynik ostateczny. Możesz zapisać raport jako PDF.';
  document.getElementById('report').disabled=false;
  document.getElementById('check').disabled=true;
  document.getElementById('check').textContent='Wniosek zakończony';
@@ -496,7 +562,7 @@ function check(){
  document.getElementById('reportMobile').hidden=false;
  document.getElementById('reset').disabled=true;
  makeReport();updateProgress();
- document.getElementById('scorebox').scrollIntoView({behavior:'smooth',block:'nearest'});
+ if(!restored)document.getElementById('scorebox').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function printMode(mode){document.body.dataset.print=mode;makeReport();window.print();}
 window.addEventListener('afterprint',()=>document.body.removeAttribute('data-print'));
@@ -507,6 +573,7 @@ function reset(){
  document.querySelectorAll('.feedback').forEach(f=>f.textContent='');
  ['studentName','studentSurname','studentClass'].forEach(id=>document.getElementById(id).value='');
  document.getElementById('studentError').hidden=true;
+ clearStoredWork();showStorageNotice('Formularz wyczyszczony. Nowe odpowiedzi będą zapisywane automatycznie.');
  updateVisibility();window.scrollTo({top:0,behavior:'smooth'});
 }
 document.addEventListener('click',event=>{
@@ -535,8 +602,13 @@ document.getElementById('caseInline').addEventListener('click',openCase);
 document.getElementById('caseClose').addEventListener('click',()=>caseDialog.close());
 caseDialog.addEventListener('click',e=>{if(e.target===caseDialog)caseDialog.close();});
 // Karta przypadku jest drukowana wraz z pustym formularzem dla nieobecnych.
+for(const eventName of ['input','change']){
+ document.getElementById('sections').addEventListener(eventName,persistWork);
+ document.getElementById('studentInfo').addEventListener(eventName,persistWork);
+}
 document.getElementById('casePrint').innerHTML='<div class="print-student"><span>Imię ucznia: ........................................</span><span>Nazwisko: ........................................</span><span>Klasa: .................</span></div>'+document.getElementById('caseDescription').innerHTML;
 render();
+restoreStoredWork();
 
 </script>
 </body></html>
