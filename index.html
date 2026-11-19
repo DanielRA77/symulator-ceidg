@@ -194,7 +194,7 @@ button[disabled]{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
-<header class="top noprint"><div class="topinner"><div><b>CEIDG-1 • SYMULATOR EDUKACYJNY</b><br><small>Ćwiczenie szkolne · wersja inspirowana formularzem CEIDG-1 v3.3</small></div><div class="controls"><button type="button" id="check" class="primary">Sprawdź wniosek</button><button type="button" id="report" disabled>Wydrukuj wynik / PDF</button><button type="button" id="worksheet">Drukuj formularz</button><button type="button" id="reset">Wyczyść</button></div></div></header>
+<header class="top noprint"><div class="topinner"><div><b>CEIDG-1 • SYMULATOR EDUKACYJNY</b><br><small>Ćwiczenie szkolne · wersja inspirowana formularzem CEIDG-1 v3.3</small></div><div class="controls"><button type="button" id="check" class="primary">Sprawdź wniosek</button><button type="button" id="report" disabled>Wydrukuj wynik / PDF</button><button type="button" id="worksheet">Drukuj formularz</button><button type="button" id="reset">Rozpocznij nowy wniosek</button></div></div></header>
 <section id="casePrint" class="print-case-card"></section><main class="shell"><aside class="sidebar" id="case"><section class="student-card" id="studentInfo" aria-labelledby="studentTitle">
 <h2 id="studentTitle">Dane ucznia — poza wnioskiem</h2>
 <p class="student-help">Wypełnij przed rozpoczęciem. Dane są wymagane do podpisania pracy, ale <strong>nie są punktowane</strong>.</p>
@@ -226,13 +226,13 @@ button[disabled]{opacity:.45;cursor:not-allowed}
 
 <div class="status"><div><strong id="filled">0</strong> / <span id="fieldTotal">68</span> widocznych pól wypełnionych</div><div class="bar"><span id="progress"></span></div><span class="small">Punktacja: <span id="pointsDetail">maksymalnie 15,00 pkt.</span></span></span></div>
 <p id="storageNotice" class="storage-notice" role="status" aria-live="polite">Wprowadzane dane i wynik są automatycznie zachowywane w tej przeglądarce.</p>
-<div id="scorebox" role="status" aria-live="polite"><h2>Wynik końcowy — wniosek zamknięty</h2><div class="score" id="firstScore">—</div><div id="currentScore"></div><div class="helper" style="margin-top:8px">Po zatwierdzeniu wniosku nie można już zmieniać odpowiedzi ani ponownie go sprawdzać. Błędne pola są oznaczone, ale poprawne odpowiedzi nie są ujawniane.</div></div>
+<div id="scorebox" role="status" aria-live="polite"><h2>Wynik końcowy — wniosek zamknięty</h2><div class="score" id="firstScore">—</div><div id="currentScore"></div><div class="helper" style="margin-top:8px">Po zatwierdzeniu wniosku nie można już zmieniać odpowiedzi ani ponownie go sprawdzać. Aby zacząć od początku, wybierz „Rozpocznij nowy wniosek”. Błędne pola są oznaczone, ale poprawne odpowiedzi nie są ujawniane.</div></div>
 <p class="footer-note">Plik działa lokalnie, bez internetu, bez konta i bez wysyłania danych do CEIDG. Do zapisania raportu jako PDF wybierz „Wydrukuj wynik / PDF”, a następnie w oknie drukowania wybierz „Zapisz jako PDF”.</p>
 </aside>
 <article class="paper" id="paper"><div class="paperhead"><div><small>Więcej informacji na oficjalnej stronie Biznes.gov.pl/ceidg</small><h1>CEIDG-1 (wersja 3.3) — Wniosek do Centralnej Ewidencji i Informacji o Działalności Gospodarczej</h1></div><div class="stamp">ĆWICZENIE SZKOLNE<br>NIE JEST WNIOSKIEM URZĘDOWYM</div></div>
 <div class="notice"><strong>UWAGA</strong><span id="fieldDescription">Symulator edukacyjny — wybrane sekcje CEIDG-1 (wersja 3.3), maksymalnie 15 punktów. Numeracja odpowiada formularzowi urzędowemu; pominiętych sekcji nie trzeba wypełniać.</span></div>
 <div id="sections"></div><div class="bottom"><span>CEIDG-1 · symulator szkolny · opracowanie dydaktyczne</span><span>15 punktów maksymalnie</span></div></article></main>
-<nav class="mobile-tools noprint" id="mobileTools" aria-label="Narzędzia mobilne"><button id="caseMobile" type="button" aria-haspopup="dialog">Opis przedsiębiorcy</button><button id="checkMobile" type="button" class="primary">Sprawdź wniosek</button><button id="reportMobile" type="button" class="primary" hidden>Wynik / PDF</button></nav>
+<nav class="mobile-tools noprint" id="mobileTools" aria-label="Narzędzia mobilne"><button id="caseMobile" type="button" aria-haspopup="dialog">Opis przedsiębiorcy</button><button id="checkMobile" type="button" class="primary">Sprawdź wniosek</button><button id="reportMobile" type="button" class="primary" hidden>Wynik / PDF</button><button id="newAttemptMobile" type="button" aria-label="Rozpocznij nowy wniosek">Nowy wniosek</button></nav>
 <dialog id="caseDialog" class="case-dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle">Karta przedsiębiorcy</h2><button id="caseClose" type="button" aria-label="Zamknij opis przedsiębiorcy">Zamknij ✕</button></div><div id="caseDialogContent" class="dialog-content"></div></dialog>
 <section id="reportSheet" aria-label="Raport oceniania"><h1>Raport oceny — symulator CEIDG-1</h1><p>Dokument dydaktyczny. Nie jest urzędowym wnioskiem ani potwierdzeniem jego złożenia.</p><p id="reportStudent"></p><p id="reportClass"></p><p id="reportDate"></p><div id="reportGrade" class="report-grade"></div><p id="reportAfter"></p><h2>Ocena poszczególnych pól — pierwsza próba</h2><table><thead><tr><th>Pole</th><th>Twoja odpowiedź przy pierwszym sprawdzeniu</th><th>Punkty</th></tr></thead><tbody id="reportRows"></tbody></table><p style="font-size:10px;margin-top:14px">Klucz odpowiedzi i punktacja są elementem uproszczonego ćwiczenia dydaktycznego. Złożenie prawdziwego wniosku jest możliwe wyłącznie oficjalną drogą.</p></section>
 <script>
@@ -560,21 +560,18 @@ function lockAndShowResult(restored){
  document.getElementById('check').textContent='Wniosek zakończony';
  document.getElementById('checkMobile').hidden=true;
  document.getElementById('reportMobile').hidden=false;
- document.getElementById('reset').disabled=true;
+ // Przycisk nowej próby pozostaje aktywny także po sprawdzeniu wniosku.
  makeReport();updateProgress();
  if(!restored)document.getElementById('scorebox').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function printMode(mode){document.body.dataset.print=mode;makeReport();window.print();}
 window.addEventListener('afterprint',()=>document.body.removeAttribute('data-print'));
 function reset(){
- if(firstResult || !window.confirm('Wyczyścić cały formularz i rozpocząć od początku?'))return;
- for(const f of FIELDS)setValue(f,'');
- document.querySelectorAll('.field').forEach(w=>w.removeAttribute('data-status'));
- document.querySelectorAll('.feedback').forEach(f=>f.textContent='');
- ['studentName','studentSurname','studentClass'].forEach(id=>document.getElementById(id).value='');
- document.getElementById('studentError').hidden=true;
- clearStoredWork();showStorageNotice('Formularz wyczyszczony. Nowe odpowiedzi będą zapisywane automatycznie.');
- updateVisibility();window.scrollTo({top:0,behavior:'smooth'});
+ if(!window.confirm('Czy na pewno chcesz rozpocząć nowy wniosek? Wszystkie dotychczasowe odpowiedzi i uzyskany wynik zostaną usunięte z tej przeglądarki.'))return;
+ // Wyczyść również wynik zapisany po poprzedniej próbie. Przeładowanie
+ // przywraca pełną edytowalność i prawidłowy stan wszystkich kontrolek.
+ clearStoredWork();
+ window.location.reload();
 }
 document.addEventListener('click',event=>{
  if(event.target.closest('.date-line'))return;
@@ -593,6 +590,7 @@ document.getElementById('report').addEventListener('click',()=>printMode('report
 document.getElementById('reportMobile').addEventListener('click',()=>printMode('report'));
 document.getElementById('worksheet').addEventListener('click',()=>printMode('worksheet'));
 document.getElementById('reset').addEventListener('click',reset);
+document.getElementById('newAttemptMobile').addEventListener('click',reset);
 const caseDialog=document.getElementById('caseDialog');
 const caseClone=document.getElementById('caseDescription').cloneNode(true);caseClone.removeAttribute('id');
 document.getElementById('caseDialogContent').append(caseClone);
